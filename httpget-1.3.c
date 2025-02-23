@@ -87,6 +87,9 @@
 
 #include <errno.h>
 
+#include <stdlib.h>
+#include <time.h>
+
 #define BUFSIZE 2048
 
 int readline(int fd,char *ptr,int maxlen);
@@ -262,7 +265,9 @@ void main(argc,argv)
   for (;;) {
     nread = read(sockfd, buf, BUFSIZE);
     bytecount += nread;
-    if (nread==0) {
+    if (nread)
+      fwrite(buf, 1, nread, stdout);
+    if (nread<BUFSIZE) {
       time_t end=time(NULL);
       close(sockfd);
       fprintf(stderr, "\n%i bytes received in %d seconds (%d bytes/sec).\n",
@@ -270,7 +275,6 @@ void main(argc,argv)
       exit(0);
     }
     alarm(60*30); /* 30 minutes */
-    fwrite(buf, 1, nread, stdout);
   }
 }
 

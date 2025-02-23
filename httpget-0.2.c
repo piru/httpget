@@ -4,16 +4,14 @@
  * Compile with: gcc httpget.c -o httpget
  *           or: cc httpget.c -o httpget
  * Usage: httpget <host> <port> <remote_file> <local_file>
- *      Example: httpget 143.54.10.6 80 /info_logo.gif teste.gif 
- * TODO: implement URLs. 
+ *      Example: httpget 143.54.10.6 80 /info_logo.gif teste.gif
+ * TODO: implement URLs.
  *
  * Rafael Sagula - sagula@inf.ufrgs.br
  *                 http://www.inf.ufrgs.br/~sagula
- * 
- * Bibliography: "UNIX Network Programming" - Richard Stevens
-(rstevens@noao.edu)
- *               "Advanced Programming in UNIX Environment" - Richard Stevens
-(the same)
+ *
+ * Bibliography: "UNIX Network Programming" - Richard Stevens (rstevens@noao.edu)
+ *               "Advanced Programming in UNIX Environment" - Richard Stevens (the same)
  *
  *      Daniel Stenberg - Daniel.Stenberg@sth.frontec.se
  *        Adjusted it slightly to accept named hosts on the command line. We
@@ -23,19 +21,26 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#ifdef _WIN32
 #include <winsock.h>
 #include <io.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <arpa/inet.h>
-//#include <sys/time.h>
-//#include <sys/resource.h>
-//#include <unistd.h>
+#ifndef _WIN32
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
 #include <fcntl.h>
 
-//#include <netdb.h>
+#ifndef _WIN32
+#include <netdb.h>
+#endif
 
 #define bzero(x,y) memset(x,0,y)
 
@@ -63,21 +68,24 @@ struct hostent *GetHost(char *hostname)
   return (h);
 }
 
-int main()
+/*int main()*/
+int main(argc,argv)
+    int argc;
+    char *argv[];
 {
   struct hostent *hp=NULL;
   int sockfd, addrlen, clilen, nread, port, fileout;
   struct sockaddr_in *my_addr, serv_addr, cli_addr;
   char buf[BUFSIZE];
   char host_addr[100];
-  char *argv[5];
+/*  char *argv[5];
   int argc=0;
 
 	argv[1]="143.54.10.6";
 	argv[2]="80";
 	argv[3]="/info_logo.gif";
 	argv[4]="teste.gif";
-	argc=5;
+	argc=5;*/
 
   if (argc<5) {
     printf("HTTPGET - Rafael Sagula/Daniel Stenberg - 1996\n");
@@ -87,7 +95,7 @@ int main()
   
 //  alarm(60*30); /* 30 minutes */
 
-  fileout = open(argv[4], O_WRONLY|O_CREAT|O_TRUNC);
+  fileout = open(argv[4], O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	if (fileout>=0) {
 		if((hp = GetHost(argv[1]))) {
 			sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -107,9 +115,11 @@ int main()
 				for (;;) {
 					nread = read(sockfd, buf, BUFSIZE);
 					if (nread)
+						write(fileout, buf, nread);
+					if (nread < BUFSIZE)
 						break;
-					write(fileout, buf, nread);
 					printf("#");
+					fflush(stdout);
 				}
 				printf("\nDone.\n");
 			} else
