@@ -1,6 +1,7 @@
 # httpget
 
-Historic versions of httpget source code
+Historic versions of httpget source code. They were not properly saved and
+kept at the time, so we have tried to restore them after the fact.
 
 ## httpget 0.1 (Nov 11, 1996)
 
@@ -32,7 +33,7 @@ missing
 
 missing
 
-## httpget 1.3 (Jun 1 1997
+## httpget 1.3 (Jun 1 1997)
 
 193 lines of code, 87 lines of comments.
 
