@@ -22,25 +22,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#include <winsock.h>
-#include <io.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef _WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
-#endif
 #include <fcntl.h>
 
-#ifndef _WIN32
 #include <netdb.h>
-#endif
 
 #define bzero(x,y) memset(x,0,y)
 
@@ -81,55 +73,55 @@ int main(argc,argv)
 /*  char *argv[5];
   int argc=0;
 
-	argv[1]="143.54.10.6";
-	argv[2]="80";
-	argv[3]="/info_logo.gif";
-	argv[4]="teste.gif";
-	argc=5;*/
+        argv[1]="143.54.10.6";
+        argv[2]="80";
+        argv[3]="/info_logo.gif";
+        argv[4]="teste.gif";
+        argc=5;*/
 
   if (argc<5) {
     printf("HTTPGET - Rafael Sagula/Daniel Stenberg - 1996\n");
     printf("usage: httpget <host> <port> <remote_file> <local_file>\n");
     exit(-1);
   }
-  
-//  alarm(60*30); /* 30 minutes */
 
-  fileout = open(argv[4], O_WRONLY|O_CREAT|O_TRUNC, 0644);
-	if (fileout>=0) {
-		if((hp = GetHost(argv[1]))) {
-			sockfd = socket(AF_INET, SOCK_STREAM, 0);
-		
-			bzero((char *) &serv_addr, sizeof(serv_addr));
-			serv_addr.sin_family = hp->h_addrtype;
-			memcpy((char *)&(serv_addr.sin_addr), hp->h_addr, hp->h_length);
-			serv_addr.sin_port = htons(atoi(argv[2]));
-		  
-			if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) >= 0) {
-				printf("Connected!\n");
-			
-				send_get(sockfd, argv[3]);
-			
-				skip_header(sockfd); 
-			
-				for (;;) {
-					nread = read(sockfd, buf, BUFSIZE);
-					if (nread)
-						write(fileout, buf, nread);
-					if (nread < BUFSIZE)
-						break;
-					printf("#");
-					fflush(stdout);
-				}
-				printf("\nDone.\n");
-			} else
-				printf("Can't connect to server. \n");
-			close(sockfd);
-	  } else
-			fprintf(stderr, "Couldn't get host, exiting");
-		close(fileout);
+  alarm(60*30); /* 30 minutes */
+
+  fileout = open(argv[4], O_WRONLY|O_CREAT|O_TRUNC);
+        if (fileout>=0) {
+                if((hp = GetHost(argv[1]))) {
+                        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+                        bzero((char *) &serv_addr, sizeof(serv_addr));
+                        serv_addr.sin_family = hp->h_addrtype;
+                        memcpy((char *)&(serv_addr.sin_addr), hp->h_addr, hp->h_length);
+                        serv_addr.sin_port = htons(atoi(argv[2]));
+
+                        if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) >= 0) {
+                                printf("Connected!\n");
+
+                                send_get(sockfd, argv[3]);
+
+                                skip_header(sockfd);
+
+                                for (;;) {
+                                        nread = read(sockfd, buf, BUFSIZE);
+                                        if (nread)
+                                                write(fileout, buf, nread);
+                                        if (nread < BUFSIZE)
+                                                break;
+                                        printf("#");
+                                        fflush(stdout);
+                                }
+                                printf("\nDone.\n");
+                        } else
+                                printf("Can't connect to server. \n");
+                        close(sockfd);
+          } else
+                        fprintf(stderr, "Couldn't get host, exiting");
+                close(fileout);
   } else
-		printf("Can't open output file: %s\n",argv[4]);
+                printf("Can't open output file: %s\n",argv[4]);
   return 0;
 }
 
@@ -138,23 +130,23 @@ int readline(int fd,char *ptr,int maxlen)
 {
   int n, rc;
   char c;
-        
+
   for (n = 1; n < maxlen; n++) {
     if ( (rc = read(fd, &c, 1)) == 1) {
       if (c == '\n')
-				break;
+                                break;
       *ptr++ = c;
     } else if (rc == 0) {
-			if (n == 1)
-				return(0);
-			else
-				break;
-		} else
-			return(-1);
-	}
-	*ptr = 0;
+                        if (n == 1)
+                                return(0);
+                        else
+                                break;
+                } else
+                        return(-1);
+        }
+        *ptr = 0;
   return(n);
-} 
+}
 
 int send_get(int fd, char *file)
 {
